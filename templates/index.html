@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Check-in · Conselho de Liderança</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}" />
+  </head>
+  <body>
+    <div class="aurora" aria-hidden="true"></div>
+
+    <main class="shell">
+      <header class="top">
+        <div class="brand">
+          <span class="emblem" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2.5l2.6 5.6 6.1.8-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L3.3 8.9l6.1-.8z" />
+            </svg>
+          </span>
+          <div>
+            <p class="kicker">Conselho de Liderança</p>
+            <h1>Check-in</h1>
+          </div>
+        </div>
+        <p class="lede">
+          Bem-vindo! Escolha sua estaca, a unidade e o chamado para confirmar a presença.
+        </p>
+      </header>
+
+      <ol class="steps" aria-label="Etapas">
+        <li data-step="estaca" class="is-current"><b>1</b><span>Estaca</span></li>
+        <li data-step="unidade"><b>2</b><span>Unidade</span></li>
+        <li data-step="chamado"><b>3</b><span>Chamado</span></li>
+      </ol>
+
+      <section class="panel" id="painel">
+        <div class="panel-head">
+          <div class="panel-nav">
+            <button type="button" class="ghost compact" id="voltar" hidden>
+              <span aria-hidden="true">←</span> Voltar
+            </button>
+            <button type="button" class="ghost compact ajuda" id="ajuda" hidden>
+              Não encontrei meu chamado
+            </button>
+          </div>
+          <div class="panel-titles">
+            <h2 id="painel-titulo">De qual estaca você é?</h2>
+            <p id="painel-sub">Toque na sua estaca para continuar.</p>
+          </div>
+          <p class="tip-chamado" id="tip-chamado" hidden>
+            Caso você tenha vindo para substituir um líder, clique no chamado dele
+            e altere as informações antes de finalizar o check-in.
+          </p>
+        </div>
+
+        <div class="search-wrap" id="busca-wrap">
+          <input id="busca" type="search" placeholder="Buscar na lista..." autocomplete="off" />
+        </div>
+
+        <div id="lista" class="choices"></div>
+      </section>
+
+      <footer class="rodape">
+        <p>Sua presença é registrada com segurança na lista da estaca.</p>
+      </footer>
+    </main>
+
+    <div class="toasts" id="toasts" role="status" aria-live="assertive"></div>
+
+    <dialog id="modal-nome">
+      <form method="dialog" id="form-nome">
+        <h2>Corrigir nome</h2>
+        <p>O nome será atualizado na lista oficial neste registro.</p>
+        <label for="novo-nome">Nome completo</label>
+        <input id="novo-nome" name="nome" required autocomplete="name" />
+        <div class="dialog-actions">
+          <button type="button" class="ghost" id="cancelar-nome">Cancelar</button>
+          <button type="submit" class="solid">Salvar nome</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>
