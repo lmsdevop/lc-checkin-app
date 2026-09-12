@@ -4,13 +4,13 @@
 from __future__ import annotations
 
 import socket
-from datetime import datetime
 
 from flask import Flask, jsonify, render_template, request
 
 from planilha import (
     aba_da_estaca,
     abrir_planilha,
+    agora,
     ala_do_rotulo,
     atualizar_chamado_planilha,
     atualizar_nome_planilha,
@@ -110,7 +110,7 @@ def api_checkin():
         {
             "ok": True,
             "registro": serializar(linha),
-            "hora": datetime.now().strftime("%H:%M"),
+            "hora": agora().strftime("%H:%M"),
         }
     )
 

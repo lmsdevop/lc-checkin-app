@@ -6,6 +6,9 @@ import sys
 import unicodedata
 from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
+
+FUSO = ZoneInfo("America/Sao_Paulo")
 
 import gspread
 from google.auth.transport.requests import Request
@@ -419,8 +422,12 @@ def _coluna_qrcode(cabecalhos: list[str]) -> str | None:
     return None
 
 
+def agora() -> datetime:
+    return datetime.now(FUSO)
+
+
 def texto_via_qrcode() -> str:
-    return datetime.now().strftime("Sim - %d/%m %H:%M:%S")
+    return agora().strftime("Sim - %d/%m %H:%M:%S")
 
 
 def registrar_checkin(ws, linha: dict, colunas: list[str]) -> None:
