@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 import unicodedata
 from datetime import datetime
@@ -44,18 +45,40 @@ Não use "conta de serviço".
 """.format(caminho=CREDENTIALS_FILE)
 
 
+def _json_env(nome: str) -> dict | None:
+    bruto = (os.environ.get(nome) or "").strip()
+    if not bruto:
+        return None
+    return json.loads(bruto)
+
+
+def _json_arquivo(caminho: Path) -> dict | None:
+    if not caminho.exists():
+        return None
+    return json.loads(caminho.read_text())
+
+
+def dados_credenciais() -> dict | None:
+    return _json_env("GOOGLE_CREDENTIALS") or _json_arquivo(CREDENTIALS_FILE)
+
+
+def dados_token() -> dict | None:
+    return _json_env("GOOGLE_TOKEN") or _json_arquivo(TOKEN_FILE)
+
+
 def credenciais_sao_oauth() -> bool:
     try:
-        dados = json.loads(CREDENTIALS_FILE.read_text())
-    except (OSError, json.JSONDecodeError):
+        dados = dados_credenciais() or {}
+    except json.JSONDecodeError:
         return False
     return "installed" in dados or "web" in dados
 
 
 def autenticar(quiet: bool = False) -> Credentials:
     creds = None
-    if TOKEN_FILE.exists():
-        creds = Credentials.from_authorized_user_file(str(TOKEN_FILE), SCOPES)
+    token = dados_token()
+    if token:
+        creds = Credentials.from_authorized_user_info(token, SCOPES)
 
     if creds and creds.valid:
         if not quiet:
@@ -66,20 +89,26 @@ def autenticar(quiet: bool = False) -> Credentials:
         if not quiet:
             print("Renovando login salvo...")
         creds.refresh(Request())
-        TOKEN_FILE.write_text(creds.to_json())
+        if not os.environ.get("GOOGLE_TOKEN"):
+            TOKEN_FILE.write_text(creds.to_json())
         return creds
+
+    cliente = dados_credenciais()
+    if not cliente:
+        print(INSTRUCOES_OAUTH)
+        sys.exit(1)
 
     if not quiet:
         print("Abrindo o navegador para login na sua conta Google...")
         print(f"Se aparecer redirect_uri_mismatch, cadastre http://localhost:{OAUTH_PORT}/ no cliente OAuth.")
-    flow = InstalledAppFlow.from_client_secrets_file(str(CREDENTIALS_FILE), SCOPES)
+    flow = InstalledAppFlow.from_client_config(cliente, SCOPES)
     creds = flow.run_local_server(port=OAUTH_PORT, prompt="consent")
     TOKEN_FILE.write_text(creds.to_json())
     return creds
 
 
 def abrir_planilha(quiet: bool = False):
-    if not CREDENTIALS_FILE.exists() or not credenciais_sao_oauth():
+    if not credenciais_sao_oauth():
         print(INSTRUCOES_OAUTH)
         sys.exit(1)
 
