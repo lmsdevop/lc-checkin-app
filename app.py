@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import socket
+import os
+import secrets
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, Response
 
 from planilha import (
     aba_da_estaca,
@@ -29,6 +31,26 @@ from planilha import (
 )
 
 app = Flask(__name__)
+
+
+@app.before_request
+def require_operator_login():
+    """Require HTTP Basic authentication for every route, including reads."""
+    username = os.environ.get("CHECKIN_USERNAME")
+    password = os.environ.get("CHECKIN_PASSWORD")
+    if not username or not password:
+        return jsonify({"ok": False, "erro": "Autenticação não configurada."}), 503
+    auth = request.authorization
+    if not auth or not (
+        secrets.compare_digest(auth.username or "", username)
+        and secrets.compare_digest(auth.password or "", password)
+    ):
+        return Response(
+            "Authentication required",
+            401,
+            {"WWW-Authenticate": 'Basic realm="Check-in"'}
+        )
+
 _planilha = None
 
 

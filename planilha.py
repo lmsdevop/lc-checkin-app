@@ -15,7 +15,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-SHEET_ID = "1z1QjJGWOaxboPOFUDmk5CC-5kkDdqT1bcWl8lL_B_fs"
+SHEET_ID = os.environ.get("GOOGLE_SHEET_ID", "").strip()
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 OAUTH_PORT = 8080
 PASTA = Path(__file__).resolve().parent
@@ -115,6 +115,8 @@ def abrir_planilha(quiet: bool = False):
         print(INSTRUCOES_OAUTH)
         sys.exit(1)
 
+    if not SHEET_ID:
+        raise ValueError('GOOGLE_SHEET_ID não configurado.')
     client = gspread.authorize(autenticar(quiet=quiet))
     return client.open_by_key(SHEET_ID)
 
